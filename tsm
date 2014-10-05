@@ -1,0 +1,186 @@
+import java.util.*;
+import java.io.*;
+public class tsm
+{
+    public static double [][] Distance=new double[100][100];
+    
+    public static void main(String args[])throws IOException
+    {   int nC = 100;
+        int num=0;
+        int num1=0;
+        boolean[] array=new boolean[nC];
+        double totaldis=0;
+        double dis=10000;
+        int [] trackarray=new int[nC];
+        int [] trackarray2=new int[nC];
+        double [][] Distance=new double[nC][nC];
+        FileIO reader = new FileIO();
+        String[] lat = reader.load("lat3.txt");
+        double[]latitude=new double[lat.length];
+        for(int i=0;i<lat.length;i++)
+        {
+          latitude[i] =Double.parseDouble(lat[i]);    
+        }
+        String[] lng = reader.load("long3.txt");
+        double[]longitude=new double[lng.length];
+        for(int i=0;i<lng.length;i++)
+        {
+          longitude[i] =Double.parseDouble(lng[i]);    
+        }
+        
+        for(int i =0;i<nC;i++)
+        {
+            for(int j=0;j<nC;j++)
+            {
+                Distance[i][j]=distance(latitude[i],longitude[i],latitude[j],longitude[j]);
+            }
+        }
+    
+         
+        
+        
+        double smallest = 100000;
+        
+        for(int a=0;a<nC;a++)
+       {
+        int startingTown =a;
+        trackarray[0] = startingTown; 
+        int count =1;
+        int currentTown =a;
+        int smallestTown=0;
+        array[startingTown] = true;     
+            for(int i =1;i<nC;i++) 
+            {
+                smallest=100000;
+                for(int j = 0; j<nC; j++)
+                {
+                    if(array[j] == false)
+                    {
+                        
+                       
+                           if(smallest > Distance[currentTown][j]) 
+                            {
+                              smallest = Distance[currentTown][j];
+                              smallestTown = j;
+                            }
+                       
+                   }
+               }
+               array[smallestTown] =true;
+               trackarray[count++] = smallestTown;
+               currentTown = smallestTown;
+               totaldis+=smallest;
+               
+        }  
+        totaldis=totaldis+Distance[trackarray[0]][trackarray[trackarray.length-1]];
+        
+        if(dis>totaldis)
+        {
+            dis=totaldis;
+            for(int d=0;d<nC;d++)
+            {
+                 trackarray2[d]=trackarray[d];
+            }
+           
+        }
+         for(int l = 0; l<nC; l++)
+         {
+              array[l] = false;
+              trackarray[l] = 0;
+              totaldis=0;
+         }
+       
+         
+    }
+        Twopt(trackarray2,dis,Distance);
+        
+        
+       for(int k=0;k<nC;k++)
+        {
+           System.out.print(".");
+            System.out.print(trackarray2[k]+1);
+            
+            
+        
+       }
+       System.out.println(" "+dis);
+    }
+    public static double distance(double aa,double bb,double cc,double dd)
+    {
+   
+    double lat1=aa;
+    double lng1=bb;
+    double lat2=cc;
+    double lng2=dd;
+    int r = 6371; 
+    double dLat = Math.toRadians(lat2 - lat1);
+    double dLon = Math.toRadians(lng2 - lng1);
+    double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    double d = r * c;
+    return d;
+    }
+    public static void Twopt(int []a,double distance,double [][] array)
+    {
+        int []path=a;
+        int []newpath=new int[100];
+        int []path1=path;
+        double d=distance;
+        double [][] array2=array;
+        double newd=distance;
+        for(int i=0;i<95;i++)
+        {
+            for(int j=i+1;j<i+5;j++)
+            {
+               int c= path[i];
+               path[i]=path[j];
+               path[j]=c;
+               newd=pathDistance(path,array2);
+               if(d>newd)
+               {
+                   d=newd;
+                for(int y=0;y<100;y++)
+                {
+                newpath[y]=path[y];
+                }
+                }
+               int f =path[j];
+               path[j]=path[i];
+               path[i]=f;
+               
+            }
+            
+        }
+        
+    
+         for(int k=0;k<100;k++)
+        {
+            System.out.print(".");
+            System.out.print(newpath[k]+1);
+            
+            
+        
+       }
+         System.out.println(" "+d);
+    
+        
+    }
+    
+    public static double pathDistance(int[]b,double[][]c)
+    
+    {
+        
+        double totaldis=0;
+        double [][] Distance=c;
+          int [] trackarray=b;
+        for(int i=0;i<99;i++)
+        {
+           
+                
+            totaldis=totaldis+Distance[trackarray[i]][trackarray[i+1]];
+            
+        }
+         totaldis=totaldis+Distance[trackarray[0]][trackarray[trackarray.length-1]];
+        return totaldis;
+    }
+}
